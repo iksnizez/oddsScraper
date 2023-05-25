@@ -63,6 +63,8 @@ class actNetScraper:
                 'core_bet_type_310_last_goal_scoer':{'o':None, 'u':None, 'type':'gsLast', 'html_str_responses':[]},
             }
         }
+        self.columns_players = ['playerId', 'player', 'abbr']
+        self.player_list = []
 
 
     # scrape website for dates and league
@@ -252,6 +254,11 @@ class actNetScraper:
                                         all_props_single_type[propId][13] = j['implied_value']
                                         all_props_single_type[propId][14] = j['edge']
                                         all_props_single_type[propId][16] = j['grade']              
+                # gather player names
+                players = json_single_date['markets'][0]['players']
+                for p in players:
+                    player = [p['id'], p['full_name'], p['abbr']]
+                    self.player_list.append(player)
 
             # store the data from this loop                
             temp = pd.DataFrame(all_props_single_type.values(), 
@@ -260,6 +267,13 @@ class actNetScraper:
             ).reset_index(names=['propId'])
                 
             df_props = pd.concat([df_props, temp])
+
+        # aggregating player to single df 
+        df_players = pd.DataFrame(self.player_list, columns=self.columns_players)           
+        df_players.drop_duplicates('playerId', inplace=True)
+        
+        # merge player names to odds
+        df_props = df_props.merge(df_players, on= 'playerId')
 
         return df_props
 
