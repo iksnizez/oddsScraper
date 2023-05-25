@@ -165,14 +165,21 @@ class actNetScraper:
                         if j.get("statusCode") is not None:
                             continue
                         else:
-                            propId = j['prop_id']
+                            playerId = j['player_id']
+
+                            # nhl has duplicate propIds, creating new propId by adding playerId to it
+                            if league == 'nhl':
+                                propId = int(str(j['prop_id']) + str(playerId))
+                            else:
+                                propId = j['prop_id']
+
                             ou_check = j['option_type_id']
 
                             # if the player is not in this dict, it will be added. if it is in then
                             # only the odds that are not present will be added
                             if all_props_single_type.get(propId) is None:
                                 
-                                entry[0] = j['player_id']
+                                entry[0] = playerId
                                 entry[1] = j['team_id']
                                 entry[2] = j['game_id']
                                 entry[3] = date
