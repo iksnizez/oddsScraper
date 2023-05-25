@@ -1,10 +1,10 @@
 # Scraping odds for NBA, MLB, NHL
 
-This python module can be use to compile odds from the major sports leagues from an public API. It can output the data to a dataframe for immediate analysis or send it to a database for storage via pymysql.
+This python module can be use to compile odds from the major sports leagues from a public API. It can output the data to a dataframe for immediate analysis or send it to a MySQL database for storage via pymysql.
 
-The API has to have a decent amount of historical data stored but I have not tested the actual cutoff dates. All the leagues atleast have data available going back 2020-2021 seasons, although some of the specific props are not as frequent. 
+The API has a decent amount of historical data stored but I have not tested the limits of the historical cutoff dates. All the leagues atleast have data available going back 2020-2021 seasons, although some of the specific props are not as frequent. 
 
-The scraping utilizes Selenium and takes a minutes to hit the API. It has only been tested using a Firefox driver.
+The scraping utilizes Selenium and takes a minutes to run through all the props/dates with the API. It has only been tested using a Firefox driver. The page source data is also store in the scraper object if different extraction is required. The page source includes team and player ids. 
 
 A pipfile contains the required python packages.
 
