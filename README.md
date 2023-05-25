@@ -30,7 +30,7 @@ conn_details = <pymysql connection string>
 # scrape the api
 odds.scrape(league=league, 
             dates=dates, 
-            selenium_browser_path=r"..\..\browser\geckodriver.exe", 
+            selenium_browser_path= r"..\browser\geckodriver.exe", 
             sleep_secs = 2
 )
 
@@ -58,7 +58,7 @@ for league in leagues:
     # scrape the api
     odds.scrape(league=league, 
                 dates=dates, 
-                selenium_browser_path=r"..\..\browser\geckodriver.exe", 
+                selenium_browser_path= r"..\browser\geckodriver.exe", 
                 sleep_secs = 2
     )
 
