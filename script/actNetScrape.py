@@ -287,7 +287,7 @@ class actNetScraper:
     # store scraped data in db
     def loadDb(self, df_props, pymysql_conn_str):
         # make sure data is formatted
-        df_props['date']= pd.to_datetime(df_props['date'])
+        df_props.loc[:,'date'] = pd.to_datetime(df_props['date'])
         df_props = df_props.astype({"uOdds":"Int64","oOdds":"Int64"})
 
         # connect to db
