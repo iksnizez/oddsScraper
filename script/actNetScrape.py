@@ -65,6 +65,7 @@ class actNetScraper:
         }
         self.columns_players = ['playerId', 'player', 'abbr']
         self.player_list = []
+        self.players_avail = False
 
 
     # scrape website for dates and league
@@ -125,7 +126,7 @@ class actNetScraper:
             # loop through each game date for each prop
             for d in range(0,len(dates)):
                 # game date
-                date = dates[len(dates) - d - 1]
+                date = dates[d]
                 
                 # converting selenium page_source to html
                 parsed_html = BeautifulSoup(self.map_option_ids[league][i]['html_str_responses'][d],
@@ -261,11 +262,15 @@ class actNetScraper:
                                         all_props_single_type[propId][13] = j['implied_value']
                                         all_props_single_type[propId][14] = j['edge']
                                         all_props_single_type[propId][16] = j['grade']              
-                # gather player names
-                players = json_single_date['markets'][0]['players']
-                for p in players:
-                    player = [p['id'], p['full_name'], p['abbr']]
-                    self.player_list.append(player)
+                try:
+                    # gather player names
+                    players = json_single_date['markets'][0]['players']
+                    for p in players:
+                        player = [p['id'], p['full_name'], p['abbr']]
+                        self.player_list.append(player)
+                    self.players_avail = True
+                except: 
+                    continue
 
             # store the data from this loop                
             temp = pd.DataFrame(all_props_single_type.values(), 
@@ -274,13 +279,14 @@ class actNetScraper:
             ).reset_index(names=['propId'])
                 
             df_props = pd.concat([df_props, temp])
-
-        # aggregating player to single df 
-        df_players = pd.DataFrame(self.player_list, columns=self.columns_players)           
-        df_players.drop_duplicates('playerId', inplace=True)
         
-        # merge player names to odds
-        df_props = df_props.merge(df_players, on= 'playerId')
+        if self.players_avail:
+            # aggregating player to single df 
+            df_players = pd.DataFrame(self.player_list, columns=self.columns_players)           
+            df_players.drop_duplicates('playerId', inplace=True)
+            
+            # merge player names to odds
+            df_props = df_props.merge(df_players, on= 'playerId')
 
         return df_props
 
