@@ -290,8 +290,12 @@ class actNetScraper:
 
         return df_props
 
-    # store scraped data in db
-    def loadDb(self, df_props, pymysql_conn_str):
+    # store scraped data in db 
+    def loadDb(self, df_props, pymysql_conn_str, update_players=False):
+        #removing player names to load into db
+        df_players = df_props[df_props.columns[df_props.columns.isin(['playerId','player','abbr'])]]
+        df_props = df_props[df_props.columns[~df_props.columns.isin(['player','abbr'])]]
+
         # make sure data is formatted
         df_props.loc[:,'date'] = pd.to_datetime(df_props['date'])
         df_props = df_props.astype({"uOdds":"Int64","oOdds":"Int64"})
@@ -302,5 +306,10 @@ class actNetScraper:
 
         # load to db
         df_props.to_sql('odds', dbConnection, if_exists='append', index=False)
-        
+        if update_players:
+            df_players.to_sql('actnetplayers', dbConnection, if_exists='append', index=False)
+
         dbConnection.close()
+
+
+            
