@@ -9,9 +9,11 @@ The scraping utilizes Selenium and takes a minutes to run through all the props/
 A pipfile contains the required python packages.
 
 
-### Examples
+# Examples
 
-Initiating the class then option 1 or 2
+** loadDb note: <i>I use a table for player name and ID and a table for props that includes playerId the loadDb function is setup to accommodate this set up.</i>
+
+### Initiating the class then option 1 or 2
 ```
 import actNetScrape as ans
 
@@ -19,7 +21,7 @@ import actNetScrape as ans
 odds = ans.actNetScraper()
 ```
 
-Option one - single league scrape
+### Option one - single league scrape, db save optional
 ```
 # league and date list
 dates = ['2023-05-24', '2023-05-22', '2023-05-21', '2023-05-20']
@@ -35,14 +37,19 @@ odds.scrape(league=league,
 )
 
 # process page_source to JSON to df
-df = odds.processScrapes(league, dates)
+df = odds.processScrapes(leauge = league, 
+                        dates = dates
+)
 
-# if desired, save to database
-# store in database
-odds.loadDb(df, conn_details)
+# if desired, save to existing database
+odds.loadDb(df_props = df, 
+            pymysql_conn_str = conn_details,
+            update_players = True
+)
 ```
 
-Option two - multiple league scrape AND save to database
+
+### Option two - multiple league scrape AND save to database
 ```
 # league and date list
 leagues = ['mlb', 'nhl']
@@ -63,9 +70,14 @@ for league in leagues:
     )
 
     # process page_source to JSON to df
-    df = odds.processScrapes(league=league, dates=dates)
+    df = odds.processScrapes(league=league, 
+                            dates=dates
+    )
     df_odds.append(df)
 
     # store in database
-    odds.loadDb(df, conn_details)
+    odds.loadDb(df_props = df, 
+            pymysql_conn_str = conn_details,
+            update_players = True
+    )
 ```
