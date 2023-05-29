@@ -4,7 +4,7 @@ This python module can be use to compile odds from the major sports leagues from
 
 The API has a decent amount of historical data stored but I have not tested the limits of the historical cutoff dates. All the leagues atleast have data available going back 2020-2021 seasons, although some of the specific props are not as frequent. 
 
-The scraping utilizes Selenium and takes a minutes to run through all the props/dates with the API. It has only been tested using a Firefox driver. The page source data is also store in the scraper object if different extraction is required. The page source includes team and player ids. 
+The scraping utilizes Selenium and takes a few minutes to run through all the props/dates with the API when doing a small number of days. Full seasons or months will take a couple hours as to not overload the public facing server. It has only been tested using a Firefox driver. The page source data is also store in the scraper object if different extraction is required. The page source includes team and player ids. 
 
 A pipfile contains the required python packages.
 

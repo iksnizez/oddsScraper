@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 from sqlalchemy import create_engine
 
+
 class actNetScraper:
     
     def __init__(self):
@@ -293,7 +294,7 @@ class actNetScraper:
     # store scraped data in db 
     def loadDb(self, df_props, pymysql_conn_str, update_players=False):
         #removing player names to load into db
-        df_players = df_props[df_props.columns[df_props.columns.isin(['playerId','player','abbr'])]]
+        df_players = df_props[['playerId','player','abbr']]
         df_props = df_props[df_props.columns[~df_props.columns.isin(['player','abbr'])]]
 
         # make sure data is formatted
@@ -302,14 +303,31 @@ class actNetScraper:
 
         # connect to db
         sqlEngine = create_engine(pymysql_conn_str, pool_recycle=3600)
-        dbConnection = sqlEngine.connect()
+        
+        # handling loads as transaction - useful when doing mult. leagues and one on 1/2 loads.
+        with sqlEngine.connect() as dbConnection:
+            tran = dbConnection.begin()
 
-        # load to db
-        df_props.to_sql('odds', dbConnection, if_exists='append', index=False)
-        if update_players:
-            df_players.to_sql('actnetplayers', dbConnection, if_exists='append', index=False)
-
-        dbConnection.close()
+            try:
+                # load to db
+                df_props.to_sql('odds', dbConnection, if_exists='append', index=False)
+                if update_players:
+                    # players have multiple props, drop dup ids
+                    df_players.drop_duplicates('playerId', inplace=True)
+                    # retrieve the existing IDs in the db tbale
+                    playerIds = list(pd.read_sql_query('SELECT playerId FROM actnetplayers', dbConnection)['playerId'])
+                    # filter out the players that already exists
+                    df_players = df_players[~df_players['playerId'].isin(playerIds)]
+                    # update db
+                    df_players.to_sql('actnetplayers', dbConnection, if_exists='append', index=False)
+               
+                tran.commit()
+                dbConnection.close()
+            
+            except Exception as e:
+                print(e)
+                tran.rollback()
+                dbConnection.close()
 
 
             
