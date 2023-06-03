@@ -1,4 +1,4 @@
-# Scraping odds for NBA, MLB, NHL
+# Scraping odds for NBA, MLB, NHL - *actnetscrape module*
 
 This python module can be use to compile odds from the major sports leagues from a public API. It can output the data to a dataframe for immediate analysis or send it to a MySQL database for storage via pymysql.
 
@@ -27,12 +27,13 @@ odds = ans.actNetScraper()
 dates = ['2023-05-24', '2023-05-22', '2023-05-21', '2023-05-20']
 league = 'nhl'
 
-conn_details = <pymysql connection string>
+conn_details = <insert pymysql connection string>
+browser_path = <insert browser file path>
 
 # scrape the api
 odds.scrape(league=league, 
             dates=dates, 
-            selenium_browser_path= r"..\browser\geckodriver.exe", 
+            selenium_browser_path= browser_path, 
             sleep_secs = 2
 )
 
@@ -80,4 +81,28 @@ for league in leagues:
             pymysql_conn_str = conn_details,
             update_players = True
     )
+```
+
+# SCRAPING CURRENT DATE WNBA ODDS *fdscrape module*
+
+This module will scrape odds for the WNBA that are currently posted on the website. There is no historical function and only the current odds can be retrieved.
+
+# Example
+
+```
+import fdScrape as fds
+
+# assign class
+odds = fds.fdScraper()
+
+# selenium browser path
+browser_path = <insert browser file path>
+
+# call method to scrape site into dataframe
+df = odds.scrapeToDf('wnba', browser_path)
+
+#### IF LOADING DB IS DESIRED #####
+conn_details = <insert pymysql connection string>
+
+odds.loadDb(df, conn_details)
 ```
