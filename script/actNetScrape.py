@@ -1,4 +1,4 @@
-import json, time, pymysql
+import json, time, pymysql, random
 import pandas as pd
 import numpy as np
 from selenium import webdriver
@@ -113,7 +113,7 @@ class actNetScraper:
             'propId','playerId','teamId', 'gameId', 'date', 
             'prop', 'line', 'oOdds', 'uOdds', 'projValue', 
             'oImpValue', 'oEdge', 'oQual', 'oGrade',
-            'uImpValue', 'uEdge', 'uQual', 'uGrade'
+            'uImpValue', 'uEdge', 'uQual', 'uGrade', 'actNetPropId'
         ]
         df_props = pd.DataFrame(columns=columns)
 
@@ -169,11 +169,11 @@ class actNetScraper:
                         else:
                             playerId = j['player_id']
 
-                            # nhl has duplicate propIds, creating new propId by adding playerId to it
-                            if league == 'nhl':
-                                propId = int(str(j['prop_id']) + str(playerId))
-                            else:
-                                propId = j['prop_id']
+                            # actnet propId are not unique in MLB or NHL, creating own propId later
+                            actNetPropId = j['prop_id']
+
+                            ## creating custom propId
+                            propId = int(str(j['prop_id']) + str(random.random())[2:6])
 
                             ou_check = j['option_type_id']
 
@@ -187,6 +187,7 @@ class actNetScraper:
                                 entry[3] = date
                                 entry[4] = prop
                                 entry[5] = j['value']  # line
+                                entry[17] = actNetPropId # actnetpropId
                                 
                                 #the null value from json comes through strange into pandas, forcing nan
                                 if pd.isnull(j['projected_value']):
@@ -225,7 +226,7 @@ class actNetScraper:
                                         entry[13] = j['implied_value']
                                         entry[14] = j['edge']
                                         entry[16] = j['grade']
-                                
+
                                 # loading over and under data to the prop id
                                 all_props_single_type[propId] = entry
                             

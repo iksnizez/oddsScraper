@@ -1,4 +1,4 @@
-import json, time, pymysql, re
+import json, time, pymysql, re, random
 import pandas as pd
 import numpy as np
 from selenium import webdriver
@@ -129,8 +129,10 @@ class fdScraper():
         return df
     
 
-    def loadDb(self, df_props, pymysql_conn_str):
+    def loadDb(self, df_props, pymysql_conn_str, dbAction='append'):
         
+        dbAction = dbAction.lower()
+
         # make sure data is formatted
         #df_props.loc[:,'date'] = pd.to_datetime(df_props['date'])
         df_props = df_props.astype({"uOdds":"Int64","oOdds":"Int64"})
@@ -144,7 +146,7 @@ class fdScraper():
 
             try:
                 # load to db
-                df_props.to_sql('odds', dbConnection, if_exists='append', index=False)               
+                df_props.to_sql('odds', dbConnection, if_exists=dbAction, index=False)               
                 tran.commit()
                 dbConnection.close()
             

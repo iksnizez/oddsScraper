@@ -66,7 +66,7 @@ for league in leagues:
     # scrape the api
     odds.scrape(league=league, 
                 dates=dates, 
-                selenium_browser_path= r"..\browser\geckodriver.exe", 
+                selenium_browser_path= browser_path, 
                 sleep_secs = 2
     )
 
@@ -104,5 +104,7 @@ df = odds.scrapeToDf('wnba', browser_path)
 #### IF LOADING DB IS DESIRED #####
 conn_details = <insert pymysql connection string>
 
-odds.loadDb(df, conn_details)
+# call method to load df to database
+# append or replace can be used. 
+odds.loadDb(df, conn_details, "append")
 ```
