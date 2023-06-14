@@ -173,8 +173,10 @@ class actNetScraper:
                             actNetPropId = j['prop_id']
 
                             ## creating custom propId
-                            propId = int(str(j['prop_id']) + str(random.random())[2:6])
-
+                            # random number doesn't work because the random num changes when having to combine over and under
+                            #propId = int(str(j['prop_id']) + str(random.random())[2:6])
+                            propId = int(str(j['prop_id']) + str(playerId))
+                                         
                             ou_check = j['option_type_id']
 
                             # if the player is not in this dict, it will be added. if it is in then
