@@ -14,11 +14,12 @@ class fdScraper():
             'wnba':'https://sportsbook.{site}.com/navigation/wnba',
             }
         
-    # map to conver fd names to mine
+    # map to convert fd prop names to mine
     self.prop_name_map = {
             "Player Points":"pts",
             "Player Rebounds":"reb",
-            "Player Assists":"ast"
+            "Player Assists":"ast",
+            "Player Made Threes":"threes"
         }
 
 
@@ -31,11 +32,11 @@ class fdScraper():
         driver.get(site.format('fanduel'))
         time.sleep(5)
 
-        # GET THE GAME URLS FROM THE WNBA PAGE
+        #### GET THE GAME URLS FROM THE WNBA PAGE ####
         ele = driver.find_elements(By.CSS_SELECTOR, "ul")
 
         urls = []
-        # urls might consistently be in UL indx 5  ele[5]
+        # urls might consistently be in UL index 5  ele[5]
         for i in ele:
             ays = i.find_elements(By.CSS_SELECTOR, "a")
             for a in ays:
@@ -49,19 +50,21 @@ class fdScraper():
         #will hold a lists for all props on the scraped day
         all_props = []
 
-        # LOOP THROUGH THE GAME URLS TO AGGREGATE THE PROP DATA
+        #### LOOP THROUGH THE GAME URLS TO AGGREGATE THE PROP DATA ####
         for url in urls:
             # update driver to game specific url
             driver.get(url)
             time.sleep(1)
             # extract data from url text
+            # ex: https://sportsbook.fanduel.com/basketball/usa---wnba/indiana-fever-@-seattle-storm-32438148
             gameId = url.split("-")[-1]
             teams = url.split("/")[-1].split("@")
             away = teams[0].replace("-", " ")
             home = " ".join(teams[1].split("-")[0:-1]).strip()
 
-            # 20 is arbitrary and depends on how many markets fd has for the games
-            # i haven't seen more than 10 but if they add more props besides the 3 it could increase
+            # 20 is arbitrary and depends on how many markets fd has for the games; it should be greater 
+            # than the number of market button options on the game page
+            # i haven't seen more than 10 but if they add more props besides the 3 original, it could increase
             for i in range(20):
                 
                 try:
@@ -71,7 +74,7 @@ class fdScraper():
                     
                     # retrieve the html label for the button to check for the ones needing a click
                     buttonName = button.get_attribute("aria-label")
-                    if "Points" in buttonName or "Rebounds" in buttonName or "Assists" in buttonName:
+                    if "Points" in buttonName or "Rebounds" in buttonName or "Assists" in buttonName or "Threes" in buttonName:
                         # if buttons of interest, click to update the driver page for the data
                         button.click()
                         
@@ -98,10 +101,10 @@ class fdScraper():
                                     
                                     #need to filter out the text from the lines so can't just append the chunk
                                     player_data = split_txt[c:c+chunk_n]
-                                    player_data[1] = float(re.findall("\d*\.\d*", player_data[1])[0])
-                                    player_data[2] = int(player_data[2])
-                                    player_data[4] = int(player_data[4])
-                                    del player_data[3]
+                                    player_data[1] = float(re.findall("\d*\.\d*", player_data[1])[0]) # o line
+                                    player_data[2] = int(player_data[2]) # over odds
+                                    player_data[4] = int(player_data[4]) # under odds
+                                    del player_data[3] # drop duplicate uline
 
                                     #concat player to agg list
                                     all_props.append(props + player_data)
