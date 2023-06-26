@@ -19,7 +19,9 @@ class fdScraper():
             "Player Points":"pts",
             "Player Rebounds":"reb",
             "Player Assists":"ast",
-            "Player Made Threes":"threes"
+            "Player Made Threes":"threes",
+            "Player Threes":"threes",
+            "Player Threes Made":"threes"
         }
 
 
@@ -84,7 +86,8 @@ class fdScraper():
                         # there are usually 10-12 ul elements on a page from what I have seen
                         for u in ul:
                             # only interested in the ULs that have over under data
-                            # the data is easiest to access by grabbing all of the text for the UL the working with the whole string
+                            # the data is easiest to access by grabbing all of the text for the UL -
+                            # this snags the text from all LI's - then working with the whole string
                             txt = u.text
                             if "OVER" in txt or "UNDER" in txt:
                         

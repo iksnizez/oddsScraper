@@ -115,7 +115,9 @@ class actNetScraper:
             'oImpValue', 'oEdge', 'oQual', 'oGrade',
             'uImpValue', 'uEdge', 'uQual', 'uGrade', 'actNetPropId'
         ]
-        df_props = pd.DataFrame(columns=columns)
+        # df to hold all data from each loop below. 
+        # doesn't need actNetPropId column, it is only used for the loop to combine over and unders
+        df_props = pd.DataFrame(columns=columns[:-1])
 
         for i in self.map_option_ids[league].keys():
             # name of prop
@@ -281,13 +283,18 @@ class actNetScraper:
             index=all_props_single_type.keys(), 
             columns=columns[1:]
             ).reset_index(names=['propId'])
-                
+
+            # overwrite the composite propId with the actnetId
+            temp.loc[:,'propId'] = temp['actNetPropId']
+            del temp['actNetPropId']
+
+            # combine the data from the single loop with all the data    
             df_props = pd.concat([df_props, temp])
         
         if self.players_avail:
             # aggregating player to single df 
             df_players = pd.DataFrame(self.player_list, columns=self.columns_players)           
-            df_players.drop_duplicates('playerId', inplace=True)
+            df_players.loc[:,:].drop_duplicates('playerId', inplace=True)
             
             # merge player names to odds
             df_props = df_props.merge(df_players, on= 'playerId')
@@ -295,7 +302,18 @@ class actNetScraper:
         return df_props
 
     # store scraped data in db 
-    def loadDb(self, df_props, pymysql_conn_str, update_players=False):
+    def loadDb(self, df_props, pymysql_conn_str, oddsTableName='odds', dbAction='append', 
+               update_players=False, playerTableName= 'actnetplayers'):
+        '''
+        df_props = df output from processScrapes(), 
+        pymysql_conn_str = standard pymysql db conn str format
+        oddsTableName = table name in the db to load odds data, 
+        dbAction = pd.to_sql() if exists action for odds table
+        update_players = bool to update player ids in the data base with new players in the current data,
+        playerTableName= table name in the db to load new players
+
+        '''
+
         #removing player names to load into db
         df_players = df_props[['playerId','player','abbr']]
         df_props = df_props[df_props.columns[~df_props.columns.isin(['player','abbr'])]]
@@ -313,16 +331,16 @@ class actNetScraper:
 
             try:
                 # load to db
-                df_props.to_sql('odds', dbConnection, if_exists='append', index=False)
+                df_props.to_sql(oddsTableName, dbConnection, if_exists=dbAction, index=False)
                 if update_players:
                     # players have multiple props, drop dup ids
-                    df_players.drop_duplicates('playerId', inplace=True)
+                    df_players.loc[:,:].drop_duplicates('playerId', inplace=True)
                     # retrieve the existing IDs in the db tbale
                     playerIds = list(pd.read_sql_query('SELECT playerId FROM actnetplayers', dbConnection)['playerId'])
                     # filter out the players that already exists
                     df_players = df_players[~df_players['playerId'].isin(playerIds)]
                     # update db
-                    df_players.to_sql('actnetplayers', dbConnection, if_exists='append', index=False)
+                    df_players.to_sql(playerTableName, dbConnection, if_exists='append', index=False)
                
                 tran.commit()
                 dbConnection.close()
