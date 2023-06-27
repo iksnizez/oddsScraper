@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/
+output/
+"oddsScraper notes.txt"
+scripts/scratch/
+scripts/scratch.R
+*/.ipynb_checkpoints/
+
