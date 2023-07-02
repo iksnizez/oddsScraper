@@ -43,9 +43,12 @@ df = odds.processScrapes(leauge = league,
 )
 
 # if desired, save to existing database
-odds.loadDb(df_props = df, 
-            pymysql_conn_str = conn_details,
-            update_players = True
+odds.loadDb(df_props=df, 
+            pymysql_conn_str=conn_details, 
+            oddsTableName=<INSERT ODDS TABLE NAME>, 
+            dbAction='append',
+            update_players=True, 
+            playerTableName=<INSERT PLAYER TABLE NAME>
 )
 ```
 
@@ -77,15 +80,22 @@ for league in leagues:
     df_odds.append(df)
 
     # store in database
-    odds.loadDb(df_props = df, 
-            pymysql_conn_str = conn_details,
-            update_players = True
+    odds.loadDb(df_props=df, 
+            pymysql_conn_str=conn_details, 
+            oddsTableName=<INSERT ODDS TABLE NAME>, 
+            dbAction='append',
+            update_players=True, 
+            playerTableName=<INSERT PLAYER TABLE NAME>
     )
 ```
 
 # SCRAPING CURRENT DATE WNBA ODDS *fdscrape module*
 
+\>>>>>>>>>>>>>>>>> FD STOPPED ME FROM USING THIS AFTER ABOUT A MONTH  <<<<<<<<<<<<<<<<
+
 This module will scrape odds for the WNBA that are currently posted on the website. There is no historical function and only the current odds can be retrieved.
+
+
 
 # Example
 
