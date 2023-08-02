@@ -13,17 +13,21 @@ class actNetScraper:
         self.over_ids = {
             'nba': [42,34,40,30,36,38,341,346,345,344,343],
             'mlb':[506,498,508,56,54,58,52,60,100,500,62],
-            'nhl':[50,64,564,568]
+            'nhl':[50,64,564,568],
+            'wnba':[42,40,34,30]
         }
         self.under_ids = {
             'nba':[43,35,41,31,37,39,342,350,349,348,347],
             'mlb':[507,499,509,57,53,59,55,61,101,501,63],
-            'nhl':[51,65,565,569]
+            'nhl':[51,65,565,569],
+            'wnba':[43,41,35,31]
         }
         self.urls = {
             'nba':'https://api.{site}.com/web/v1/leagues/4/props/{proptype}?bookIds=369&date={date}',
             'mlb':'https://api.{site}.com/web/v1/leagues/8/props/{proptype}?bookIds=369&date={date}',
-            'nhl':'https://api.{site}.com/web/v1/leagues/3/props/{proptype}?bookIds=369&date={date}'
+            'nhl':'https://api.{site}.com/web/v1/leagues/3/props/{proptype}?bookIds=369&date={date}',
+            'wnba':'https://api.{site}.com/web/v1/leagues/5/props/{proptype}?bookIds=69,75,68,123,71,32,76,79&date={date}'
+
         }
         self.map_option_ids = {
             'nba':{
@@ -62,8 +66,15 @@ class actNetScraper:
                 'core_bet_type_312_to_score_3_or_more_goals':{'o':None, 'u':None, 'type':'gs3plus', 'html_str_responses':[]},
                 'core_bet_type_48_first_goal_scorer':{'o':None, 'u':None, 'type':'gs1st', 'html_str_responses':[]},
                 'core_bet_type_310_last_goal_scoer':{'o':None, 'u':None, 'type':'gsLast', 'html_str_responses':[]},
+            },
+            'wnba':{
+                'core_bet_type_27_points':{'o':42, 'u':43, 'type':'pts', 'html_str_responses':[]},
+                'core_bet_type_23_rebounds':{'o':34, 'u':35, 'type':'reb', 'html_str_responses':[]},
+                'core_bet_type_26_assists':{'o':40, 'u':41, 'type':'ast', 'html_str_responses':[]},
+                'core_bet_type_21_3fgm':{'o':30, 'u':31, 'type':'threes', 'html_str_responses':[]}
             }
         }
+        
         self.columns_players = ['playerId', 'player', 'abbr']
         self.player_list = []
         self.players_avail = False
@@ -294,7 +305,7 @@ class actNetScraper:
         if self.players_avail:
             # aggregating player to single df 
             df_players = pd.DataFrame(self.player_list, columns=self.columns_players)           
-            df_players.loc[:,:].drop_duplicates('playerId', inplace=True)
+            df_players.drop_duplicates('playerId', inplace=True)
             
             # merge player names to odds
             df_props = df_props.merge(df_players, on= 'playerId')
@@ -334,7 +345,7 @@ class actNetScraper:
                 df_props.to_sql(oddsTableName, dbConnection, if_exists=dbAction, index=False)
                 if update_players:
                     # players have multiple props, drop dup ids
-                    df_players.loc[:,:].drop_duplicates('playerId', inplace=True)
+                    df_players.drop_duplicates('playerId', inplace=True)
                     # retrieve the existing IDs in the db tbale
                     playerIds = list(pd.read_sql_query('SELECT playerId FROM actnetplayers', dbConnection)['playerId'])
                     # filter out the players that already exists

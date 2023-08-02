@@ -93,7 +93,11 @@ class unabatScraper:
                             text_split = i.text.strip().split("\n") # entire data text
                             date = datetime.today().strftime('%Y-%m-%d') 
                             player = text_split[2].split("(")[0]
-                            pos = text_split[2].split("(")[1].replace(")","")
+                            # position isn't always included
+                            try:
+                                pos = text_split[2].split("(")[1].replace(")","")
+                            except:
+                                pos = np.nan
                             
                             # team data
                             locale = text_split[5]
@@ -156,8 +160,8 @@ class unabatScraper:
                                             uOdds = np.nan
                                             line = np.nan
 
-                                        # combine the over and under odds with the line
-                                        temp_row_odds.append([line, oOdds, uOdds])
+                                    # combine the over and under odds with the line
+                                    temp_row_odds.append([line, oOdds, uOdds])
                             
                             ### finding most frequent line out of all the books
                             # temp_row_odds is a list of list - every list is the player, 
